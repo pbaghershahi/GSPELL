@@ -44,7 +44,7 @@ use_bow: false
 gnn_with_last_dropout: false
 dataset_random_sampling: false
 write_new_output: true
-projector_with_backward: true
+projector_with_backward: false
 add_descriptive_prompt: false
 train_test_split:
 - 0.60
