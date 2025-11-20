@@ -372,12 +372,12 @@ def generate_exp_by_llm(
 
 
 
-def extract_neighbor_support(explanation, threshold = 11701):
+def extract_neighbor_support(explanation, node_type, threshold = 11701):
     
     support = []
     not_support = []
     
-    pattern = re.compile(r"Product (\d+):.*?Support: (YES|NO)", re.DOTALL)
+    pattern = re.compile(rf"{node_type} (\d+):.*?Support: (YES|NO)", re.DOTALL)
     matches = pattern.findall(explanation)
     
     for paper_id, support_status in matches:
@@ -406,9 +406,11 @@ def eval_llm_explanations(
     
     if generated_exps is None and generated_exps_path:
         with open(generated_exps_path, "rb") as f:
-            generated_exps = pickle.load(f)
+            generated_exps = torch.load(f)
     
     data = dataset._data.to(device)
+
+    _, _, node_type = get_characterization(dataset, 0, 0)
 
     explanations = []
     for i, batch in enumerate(generated_exps):
@@ -425,7 +427,7 @@ def eval_llm_explanations(
             neighbors = entry['neighbors']
     
             # Get support info from explanation
-            supports, not_supports = extract_neighbor_support(explanation, threshold=dataset.num_samples)
+            supports, not_supports = extract_neighbor_support(explanation, node_type, threshold=dataset.num_samples)
     
             supports = [s for s in supports if s in neighbors]
             not_supports = [ns for ns in not_supports if ns in neighbors]
